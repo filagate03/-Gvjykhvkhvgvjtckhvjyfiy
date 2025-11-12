@@ -1,5 +1,0 @@
-{
-  "name": "TeleBot Deployer",
-  "description": "A web service to instantly deploy and manage Telegram bots from your browser. Write your code, provide your token, and launch your bot in seconds with real-time logging and management.",
-  "requestFramePermissions": []
-}
