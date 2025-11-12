@@ -1,38 +1,32 @@
 require('dotenv').config();
 
 const { Telegraf } = require('telegraf');
-const { OpenAI } = require('openai');
+const { GoogleGenerativeAI } = require('@google/generative-ai');
 
 const bot = new Telegraf(process.env.TELEGRAM_BOT_TOKEN);
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
-});
+const genAI = new GoogleGenerativeAI(process.env.GOOGLE_API_KEY);
 
-bot.start((ctx) => ctx.reply('Welcome to the Tarot AI bot! Send /tarot to get a reading.'));
+bot.start((ctx) => ctx.reply('Добро пожаловать в бот Таро! Отправьте /tarot, чтобы получить расклад.'));
 
 bot.command('tarot', async (ctx) => {
   try {
-    ctx.reply('Drawing a card for you...');
+    ctx.reply('Тяну карту для вас...');
 
-    const response = await openai.chat.completions.create({
-      model: 'gpt-3.5-turbo-0125',
-      messages: [
-        {
-          role: 'system',
-          content: 'You are a tarot reader. You will provide a one-card reading. The user is asking for a tarot reading.',
-        },
-        { role: 'user', content: 'Give me a one-card tarot reading.' },
-      ],
-    });
+    const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' });
 
-    const reading = response.choices[0].message.content;
+    const prompt = 'Ты — таролог. Сделай расклад на одну карту для пользователя.';
+
+    const result = await model.generateContent(prompt);
+    const response = await result.response;
+    const reading = response.text();
+
     ctx.reply(reading);
   } catch (error) {
     console.error(error);
-    ctx.reply('Sorry, something went wrong. Please try again later.');
+    ctx.reply('Извините, что-то пошло не так. Пожалуйста, попробуйте еще раз позже.');
   }
 });
 
 bot.launch();
 
-console.log('Bot started');
+console.log('Бот запущен');
